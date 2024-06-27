@@ -69,11 +69,8 @@ const themeFile = (options: PostcssThemeOptions = {}) => async (
   result: Result
 ) => {
   // Postcss-modules runs twice and we only ever want to process the CSS once
-  if (
-    root.source?.input.from.endsWith('.module.css') &&
-    // @ts-ignore
-    root.source.input.css.trim() === ''
-  ) {
+  // @ts-ignore
+  if (root.source.processed) {
     return;
   }
 
@@ -117,7 +114,7 @@ const themeFile = (options: PostcssThemeOptions = {}) => async (
   }
 };
 
-export const postcssThemed = (options: PostcssThemeOptions = {}) => {
+export const plugin = (options: PostcssThemeOptions = {}) => {
   return {
     postcssPlugin: 'postcss-themed',
     Once(root: Root, { result }: { result: Result }) {
@@ -126,6 +123,7 @@ export const postcssThemed = (options: PostcssThemeOptions = {}) => {
   };
 };
 
-postcssThemed.postcss = true;
+plugin.postcss = true;
 
+export default plugin;
 export * from './types';

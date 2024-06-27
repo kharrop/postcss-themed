@@ -1,7 +1,7 @@
 import postcss, { AcceptedPlugin } from 'postcss';
 import nested from 'postcss-nested';
 
-import { postcssThemed } from '../src/index';
+import plugin from '../src/index';
 import { PostcssThemeOptions } from '../src/types';
 
 export function normalizeResult(input: string) {
@@ -17,14 +17,11 @@ export async function run(
   opts: PostcssThemeOptions,
   inputPath?: string
 ) {
-  // Create a PostCSS instance using the postcssThemed plugin with the provided options
-  const processor = postcss([
-    nested as AcceptedPlugin,
-    postcssThemed(opts), // Use the updated postcssThemed export
-  ]);
-
   // Process the input CSS
-  const result = await processor.process(input, { from: inputPath });
+  const result = await postcss([
+    nested as AcceptedPlugin,
+    plugin(opts),
+  ]).process(input, { from: inputPath });
   expect(normalizeResult(result.css)).toEqual(normalizeResult(output));
   expect(result.warnings()).toHaveLength(0);
 }
