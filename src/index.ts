@@ -64,13 +64,16 @@ export const configForComponent = (
 };
 
 /** Generate a theme */
-const themeFile = (options: PostcssThemeOptions = {}) => (
+const themeFile = (options: PostcssThemeOptions = {}) => async (
   root: postcss.Root,
   result: postcss.Result
 ) => {
   // Postcss-modules runs twice and we only ever want to process the CSS once
-  // @ts-ignore
-  if (root.source.processed) {
+  if (
+    root.source?.input.from.endsWith('.module.css') &&
+    // @ts-ignore
+    root.source.input.css.trim() === ''
+  ) {
     return;
   }
 
@@ -93,13 +96,13 @@ const themeFile = (options: PostcssThemeOptions = {}) => (
   resolveThemeExtension(mergedConfig);
 
   if (caniuse.isSupported('css-variables', browserslist())) {
-    modernTheme(root, mergedConfig, options);
+    await modernTheme(root, mergedConfig, options);
   } else {
-    legacyTheme(root, mergedConfig, options);
+    await legacyTheme(root, mergedConfig, options);
   }
 
   // @ts-ignore
-  root.source.processed = true;
+  root.source.input.css = result.css;
 
   if (!resolveTheme && root.source.input.file) {
     const themeFilename = getThemeFilename(root.source.input.file);
@@ -114,5 +117,15 @@ const themeFile = (options: PostcssThemeOptions = {}) => (
   }
 };
 
+export const postcssThemed = (options: PostcssThemeOptions = {}) => {
+  return {
+    postcssPlugin: 'postcss-themed',
+    Once(root: postcss.Root, { result }: { result: postcss.Result }) {
+      return themeFile(options)(root, result);
+    },
+  };
+};
+
+postcssThemed.postcss = true;
+
 export * from './types';
-export default postcss.plugin('postcss-themed', themeFile);
