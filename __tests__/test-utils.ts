@@ -1,7 +1,7 @@
-import postcss from 'postcss';
+import postcss, { AcceptedPlugin } from 'postcss';
 import nested from 'postcss-nested';
 
-import plugin from '../src/index';
+import { postcssThemed } from '../src/index';
 import { PostcssThemeOptions } from '../src/types';
 
 export function normalizeResult(input: string) {
@@ -11,16 +11,20 @@ export function normalizeResult(input: string) {
     .join('');
 }
 
-export function run(
+export async function run(
   input: string,
   output: string,
   opts: PostcssThemeOptions,
   inputPath?: string
 ) {
-  return postcss([nested, plugin(opts)])
-    .process(input, { from: inputPath })
-    .then((result) => {
-      expect(normalizeResult(result.css)).toEqual(normalizeResult(output));
-      expect(result.warnings()).toHaveLength(0);
-    });
+  // Create a PostCSS instance using the postcssThemed plugin with the provided options
+  const processor = postcss([
+    nested as AcceptedPlugin,
+    postcssThemed(opts), // Use the updated postcssThemed export
+  ]);
+
+  // Process the input CSS
+  const result = await processor.process(input, { from: inputPath });
+  expect(normalizeResult(result.css)).toEqual(normalizeResult(output));
+  expect(result.warnings()).toHaveLength(0);
 }

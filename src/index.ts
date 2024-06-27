@@ -1,4 +1,4 @@
-import postcss from 'postcss';
+import { Root, Result } from 'postcss';
 import fs from 'fs';
 import debug from 'debug';
 import merge from 'deepmerge';
@@ -65,8 +65,8 @@ export const configForComponent = (
 
 /** Generate a theme */
 const themeFile = (options: PostcssThemeOptions = {}) => async (
-  root: postcss.Root,
-  result: postcss.Result
+  root: Root,
+  result: Result
 ) => {
   // Postcss-modules runs twice and we only ever want to process the CSS once
   if (
@@ -120,7 +120,7 @@ const themeFile = (options: PostcssThemeOptions = {}) => async (
 export const postcssThemed = (options: PostcssThemeOptions = {}) => {
   return {
     postcssPlugin: 'postcss-themed',
-    Once(root: postcss.Root, { result }: { result: postcss.Result }) {
+    Once(root: Root, { result }: { result: Result }) {
       return themeFile(options)(root, result);
     },
   };

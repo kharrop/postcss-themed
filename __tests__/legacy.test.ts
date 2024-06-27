@@ -1,6 +1,6 @@
 import postcss from 'postcss';
 
-import plugin from '../src/index';
+import { postcssThemed } from '../src/index';
 import { run } from './test-utils';
 
 it('Creates theme override', () => {
@@ -393,7 +393,7 @@ it('multiple values in one declaration', () => {
 });
 
 it('Requires a config', () => {
-  return postcss([plugin()])
+  return postcss([postcssThemed()])
     .process('', { from: undefined })
     .catch((e) => {
       expect(e).toEqual(new Error('No config provided to postcss-themed'));
@@ -415,7 +415,7 @@ it('Finds missing keys', () => {
     },
   };
 
-  return postcss([plugin({ config })])
+  return postcss([postcssThemed({ config })])
     .process(input, { from: undefined })
     .catch((e) => {
       expect(e.message).toContain("Theme 'dark' does not contain key 'color'");
@@ -438,7 +438,7 @@ it('Finds missing default', () => {
   };
 
   // @ts-ignore
-  return postcss([plugin({ config })])
+  return postcss([postcssThemed({ config })])
     .process(input, { from: undefined })
     .catch((e) => {
       expect(e.message).toContain(
@@ -577,7 +577,7 @@ it('non-existent default theme', () => {
 `;
 
   // @ts-ignore
-  return postcss([plugin({ config, defaultTheme: 'otherDefaultTheme' })])
+  return postcss([postcssThemed({ config, defaultTheme: 'otherDefaultTheme' })])
     .process(input, { from: undefined })
     .catch((e) => {
       expect(e.message).toContain(
@@ -733,7 +733,11 @@ it('overrides themes to single theme', () => {
   `;
 
   return postcss([
-    plugin({ config, defaultTheme: 'quickBooks', forceSingleTheme: 'true' }),
+    postcssThemed({
+      config,
+      defaultTheme: 'quickBooks',
+      forceSingleTheme: 'true',
+    }),
   ])
     .process(input, { from: undefined })
     .catch((e) => {
